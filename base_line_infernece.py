@@ -112,15 +112,4 @@ def main():
     print("✅ submission.csv generated!")
 
 if __name__ == '__main__':
-    # main()
-    import pandas as pd
-
-    # Load the CSV
-    df = pd.read_csv('submission.csv')
-
-    # Sort by the 'id' column (assuming it's named 'id')
-    df = df.sort_values(by='unique_id')
-
-    # Save back to CSV
-    df.to_csv('submission.csv', index=False)
-
+    main()
