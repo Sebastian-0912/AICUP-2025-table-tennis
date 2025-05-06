@@ -60,7 +60,7 @@ def main():
         clf = RandomForestClassifier(random_state=42)
         clf.fit(X_train, y_train)
         proba = clf.predict_proba(X_test)
-        pos_probs = [p[1] for p in proba]
+        pos_probs = [p[0] for p in proba]
         group_preds = [max(pos_probs[i*group_size:(i+1)*group_size]) for i in range(len(pos_probs)//group_size)]
         return group_preds
 
@@ -86,7 +86,7 @@ def main():
 
     # Submission formatting
     year_cols = [f'play years_{i}' for i in range(len(le_years.classes_))]
-    level_cols = [f'level_{i}' for i in range(len(le_level.classes_))]
+    level_cols = [f'level_{i+2}' for i in range(len(le_level.classes_))]
 
     result_df = pd.DataFrame()
     result_df['unique_id'] = test_ids

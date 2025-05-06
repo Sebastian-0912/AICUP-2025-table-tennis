@@ -454,5 +454,5 @@ def main():
     # AUC SCORE: 0.792(gender) + 0.998(hold) + 0.660(years) + 0.822(levels)
 
 if __name__ == '__main__':
-    data_generate()
-    # main()
+    # data_generate()
+    main()

@@ -67,10 +67,8 @@ def FFT_data(input_data, swinging_times):
         a = []
         g = []
         for swing in range(swinging_times[num], swinging_times[num+1]):
-            a.append(math.sqrt(input_data[swing][0]**2 + input_data[swing][1]**2 + input_data[swing][2]**2)) # correct
-            g.append(math.sqrt(input_data[swing][3]**2 + input_data[swing][4]**2 + input_data[swing][5]**2)) # correct
-            # a.append(math.sqrt(math.pow((input_data[swing][0] + input_data[swing][1] + input_data[swing][2]), 2))) # error
-            # g.append(math.sqrt(math.pow((input_data[swing][3] + input_data[swing][4] + input_data[swing][5]), 2))) # error
+            a.append(math.sqrt(math.pow((input_data[swing][0] + input_data[swing][1] + input_data[swing][2]), 2)))
+            g.append(math.sqrt(math.pow((input_data[swing][3] + input_data[swing][4] + input_data[swing][5]), 2)))
 
         a_mean[num] = (sum(a) / len(a))
         g_mean[num] = (sum(a) / len(a))
@@ -97,12 +95,12 @@ def feature(input_data, swinging_now, swinging_times, n_fft, a_fft, g_fft, a_fft
     for i in range(len(input_data)):
         if i==0:
             allsum = input_data[i]
-            a.append(math.sqrt(input_data[i][0]**2 + input_data[i][1]**2 + input_data[i][2]**2))
-            g.append(math.sqrt(input_data[i][3]**2 + input_data[i][4]**2 + input_data[i][5]**2))
+            a.append(math.sqrt(math.pow((input_data[i][0] + input_data[i][1] + input_data[i][2]), 2)))
+            g.append(math.sqrt(math.pow((input_data[i][3] + input_data[i][4] + input_data[i][5]), 2)))
             continue
         
-        a.append(math.sqrt(input_data[i][0]**2 + input_data[i][1]**2 + input_data[i][2]**2))
-        g.append(math.sqrt(input_data[i][3]**2 + input_data[i][4]**2 + input_data[i][5]**2))
+        a.append(math.sqrt(math.pow((input_data[i][0] + input_data[i][1] + input_data[i][2]), 2)))
+        g.append(math.sqrt(math.pow((input_data[i][3] + input_data[i][4] + input_data[i][5]), 2)))
        
         allsum = [allsum[feature_index] + input_data[i][feature_index] for feature_index in range(len(input_data[i]))]
         
@@ -193,8 +191,8 @@ def feature(input_data, swinging_now, swinging_times, n_fft, a_fft, g_fft, a_fft
     writer.writerow(output)
 
 def data_generate():
-    datapath = './39_Training_Dataset/train_data'
-    tar_dir = '39_Training_Dataset/tabular_data_train'
+    datapath = './train_data'
+    tar_dir = 'tabular_data_train'
     pathlist_txt = Path(datapath).glob('**/*.txt')
 
     
@@ -247,12 +245,12 @@ def main():
     # data_generate()
     
     # 讀取訓練資訊，根據 player_id 將資料分成 80% 訓練、20% 測試
-    info = pd.read_csv('./39_Training_Dataset/train_info.csv')
+    info = pd.read_csv('train_info.csv')
     unique_players = info['player_id'].unique()
     train_players, test_players = train_test_split(unique_players, test_size=0.2, random_state=42)
     
     # 讀取特徵 CSV 檔（位於 "./tabular_data_train"）
-    datapath = './39_Training_Dataset/tabular_data_train'
+    datapath = './tabular_data_train'
     datalist = list(Path(datapath).glob('**/*.csv'))
     target_mask = ['gender', 'hold racket handed', 'play years', 'level']
     
@@ -291,9 +289,9 @@ def main():
         clf.fit(X_train, y_train)
         
         predicted = clf.predict_proba(X_test)
-        # 取出正類（index 1）的概率
-        predicted = [predicted[i][1] for i in range(len(predicted))]
-
+        # 取出正類（index 0）的概率
+        predicted = [predicted[i][0] for i in range(len(predicted))]
+        
         
         num_groups = len(predicted) // group_size 
         if sum(predicted[:group_size]) / group_size > 0.5:
@@ -301,7 +299,7 @@ def main():
         else:
             y_pred = [min(predicted[i*group_size: (i+1)*group_size]) for i in range(num_groups)]
         
-        
+        y_pred  = [1 - x for x in y_pred]
         y_test_agg = [y_test[i*group_size] for i in range(num_groups)]
         
         auc_score = roc_auc_score(y_test_agg, y_pred, average='micro')
@@ -345,8 +343,7 @@ def main():
     y_test_le_level = le.transform(y_test['level'])
     model_multiary(X_train_scaled, y_train_le_level, X_test_scaled, y_test_le_level)
 
-    # AUC SCORE: 0.792(gender) + 0.998(hold) + 0.660(years) + 0.822(levels)
+    #AUC SCORE: 0.792(gender) + 0.998(hold) + 0.660(years) + 0.822(levels)
 
 if __name__ == '__main__':
-    # data_generate()
     main()
